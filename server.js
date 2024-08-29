@@ -83,8 +83,8 @@ Deno.serve({
 
       if(req.method == "POST" && pathname === "/activity"){
         // アクティビティの保存処理
-        const dbClient = getkvData();
-        console.log(await dbClient);
+        const dbClient = await getkvData();
+        console.log(dbClient);
 
         const dateNow = new Date();
         const timeNow = dateNow.toISOString();
@@ -95,15 +95,15 @@ Deno.serve({
         // pngをjpegに変えること
         const image = json["image"];
 
-        saveAll(await dbClient, username, activity, image, timeNow);
+        await saveAll(dbClient, username, activity, image, timeNow);
       }
 
 
       if(req.method == "POST" && pathname === "/history"){
         console.log("aaa")
         // アクティビティの保存処理aaaaa
-        const dbClient = getkvData();
-        console.log(await dbClient);
+        const dbClient = await getkvData();
+        console.log(dbClient);
 
         const dateNow = new Date();
         const timeNow = dateNow.toISOString();
@@ -114,7 +114,7 @@ Deno.serve({
         const pairactive = json["pairactive"];
         // pngをjpegに変えること
 
-        const result = saveMatchAll(await dbClient, username, pairname, pairactive, timeNow);
+        const result = await saveMatchAll(dbClient, username, pairname, pairactive, timeNow);
         return new Response(await result);
       }
 
@@ -124,9 +124,9 @@ Deno.serve({
         const pairName = json["pair_name"]; // ペアした人の名前、活動をGet
         const pairAct = json["pair_act"];
 
-        const kv = getkvData(); // Databaseを開く
+        const kv = await getkvData(); // Databaseを開く
 
-        const imageGet = getActivityImage(await kv, pairName, pairAct);
+        const imageGet = await getActivityImage(kv, pairName, pairAct);
         console.log(imageGet.value.img);
         return new Response(JSON.stringify({
           image: imageGet.value.img,
@@ -160,9 +160,9 @@ async function saveAll(kv, username, activity, image, time){
   );
 }
 
-async function saveMatchAll(kv, username, pairname, pairactive, time){
+function saveMatchAll(kv, username, pairname, pairactive, time){
   console.log(kv);
-  return await kv.set(
+  return kv.set(
     ["username", username, "history","time", time],
     {   //value
       pairName: pairname,
